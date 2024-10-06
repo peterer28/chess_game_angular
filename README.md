@@ -1,0 +1,1 @@
+simple chess game build with StockFish API and Angular, based on the freecodecamp video "Code a Chess Game with Stockfish API – JavaScript Tutorial"
