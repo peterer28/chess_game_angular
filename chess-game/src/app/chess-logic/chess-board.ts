@@ -1,7 +1,7 @@
 import { Bishop } from "./pieces/bishop";
 import { King } from "./pieces/king";
 import { knight } from "./pieces/knight";
-import { Color } from "./pieces/models";
+import { Color, FENChar } from "./pieces/models";
 import { Pawn } from "./pieces/pawn";
 import { Piece } from "./pieces/piece";
 import { Queen } from "./pieces/queen";
@@ -40,7 +40,7 @@ export class ChessBoard{
         return this._PlayerColor;
     }
 
-    public get chessBoardView(): (FENchar|null)[][]{
+    public get chessBoardView(): (FENChar|null)[][]{
         return this.chessBoard.map(row => {
             return row.map(piece => piece instanceof Piece ? piece.FENChar : null);
         })
