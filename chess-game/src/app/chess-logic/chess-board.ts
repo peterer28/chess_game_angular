@@ -11,6 +11,7 @@ import { Rook } from "./pieces/rook";
 export class ChessBoard{
     private chessBoard:(Piece|null)[][];
     private _PlayerColor = Color.White;
+    private _safeSquares: SafeSquares;
     private readonly chessBoardSize: number = 8;
     
     constructor(){
@@ -35,7 +36,8 @@ export class ChessBoard{
                 new Rook(Color.Black), new knight(Color.Black), new Bishop(Color.Black), new Queen(Color.Black),
                 new King(Color.Black), new Bishop(Color.Black), new knight(Color.Black), new Rook(Color.Black)
             ]
-        ]
+        ];
+        this._safeSquares = this.findSafeSquares();
     }
 
     public get playerColor(): Color{
@@ -46,6 +48,10 @@ export class ChessBoard{
         return this.chessBoard.map(row => {
             return row.map(piece => piece instanceof Piece ? piece.FENChar : null);
         })
+    }
+
+    public get safeSquares(): SafeSquares{
+        return this._safeSquares;
     }
 
     public static isSquareDark(x: number, y: number): boolean{
@@ -167,5 +173,26 @@ export class ChessBoard{
             }        
         }
         return SafeSquares; 
+    }
+
+    public move(prevX: number, prevY: number, newX: number, newY: number, ): void{
+        if(!this.areCoordsValid(prevX, prevY)  || !this.areCoordsValid(newX, newY)) return;
+        const piece: Piece|null = this.chessBoard[prevX][prevY];
+        if(!piece || piece.color !== this._PlayerColor) return;
+
+        const pieceSafeSquares: Coords []|undefined = this._safeSquares.get(prevX + "," + prevY);
+        if(!pieceSafeSquares || !pieceSafeSquares.find(coords => coords.x === newX && coords.y === newY))
+            throw new Error("Square is nor safe");
+        
+        if((piece instanceof Pawn || piece instanceof King || piece instanceof Rook) && !piece.hasMoved)
+            piece.hasMoved = true;
+        
+        //update board
+        this.chessBoard[prevX][prevY] = null;
+        this.chessBoard[newX][newY] = piece;
+
+        this._PlayerColor = this._PlayerColor === Color.White ? Color.Black : Color.White;
+        this._safeSquares = this.findSafeSquares();
+            
     }
 }
