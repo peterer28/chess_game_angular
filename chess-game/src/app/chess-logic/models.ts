@@ -57,7 +57,7 @@ export type LastMove = {
     prevY: number;
     currX: number;
     currY: number;
-    moveType: Set<MoveType>;
+    //moveType: Set<MoveType>;
 }
 
 type KingChecked = {
