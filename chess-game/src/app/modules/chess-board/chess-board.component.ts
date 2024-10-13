@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { ChessBoard } from 'src/app/chess-logic/chess-board';
 import { CheckState, Coords, LastMove, pieceImagePaths, SafeSquares } from 'src/app/chess-logic/models';
 import { Color, FENChar } from 'src/app/chess-logic/pieces/models';
-import { SelectedSquare } from './modules';
+import { SelectedSquare } from './models';
+import { retry } from 'rxjs';
 
 @Component({
   selector: 'app-chess-board',
@@ -16,6 +17,7 @@ export class ChessBoardComponent {
   public chessBoardView: (FENChar | null)[][] = this.chessBoard.chessBoardView;
   public get playerColor(): Color {return this.chessBoard.playerColor; };
   public get safeSquares(): SafeSquares{return this.chessBoard.safeSquares;};
+  public get gameOverMessage(): string | undefined {return this.chessBoard.gameOverMessage; };
 
   private selectedSquare: SelectedSquare = {piece: null};
   private pieceSafeSquares: Coords[] = [];
@@ -30,6 +32,12 @@ export class ChessBoardComponent {
     return this.playerColor === Color.White ?
     [FENChar.WhiteKnight, FENChar.WhiteBishop, FENChar.WhiteRook, FENChar.WhiteQueen] : 
     [FENChar.BlackKnight, FENChar.BlackBishop, FENChar.BlackRook, FENChar.BlackQueen]
+  }
+
+  public flipMode: boolean = false;
+
+  public flipBoard(): void{
+    this.flipMode = !this.flipMode;
   }
 
   public isSquareDark(x: number, y: number): boolean{
@@ -71,7 +79,8 @@ export class ChessBoardComponent {
     }
   }
 
-  public selectingPiece(x: number, y: number): void{
+  private selectingPiece(x: number, y: number): void{
+    if(this.gameOverMessage !== undefined) return;
     const piece: FENChar | null = this.chessBoardView[x][y];
     if(!piece) return;
     if(this.isWrongPieceSelected(piece)) return;
