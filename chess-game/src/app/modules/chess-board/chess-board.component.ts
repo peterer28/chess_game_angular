@@ -4,6 +4,7 @@ import { CheckState, Coords, LastMove, pieceImagePaths, SafeSquares } from 'src/
 import { Color, FENChar } from 'src/app/chess-logic/pieces/models';
 import { SelectedSquare } from './models';
 import { retry } from 'rxjs';
+import { ChessBoardService } from './chess-board.service';
 
 @Component({
   selector: 'app-chess-board',
@@ -24,6 +25,8 @@ export class ChessBoardComponent {
   private lastMove:LastMove|undefined = this.chessBoard.lastMove;
   private checkState:CheckState = this.chessBoard.checkState;
 
+  public gameHistoryPointer: number = 0;
+
   //promotion properties
   public isPromotionActive: boolean = false;
   private promotionCoords: Coords|null = null;
@@ -35,6 +38,8 @@ export class ChessBoardComponent {
   }
 
   public flipMode: boolean = false;
+
+  constructor(protected chessBoardService: ChessBoardService){ }
 
   public flipBoard(): void{
     this.flipMode = !this.flipMode;
@@ -111,15 +116,16 @@ export class ChessBoardComponent {
     }
 
     const {x: prevX, y: prevY} = this.selectedSquare;
-    this.updateBoard(prevX, prevY, newX, newY);
+    this.updateBoard(prevX, prevY, newX, newY, this.promotedPiece);
   }
 
-  private updateBoard(prevX: number, prevY: number, newX: number, newY: number): void{
-    this.chessBoard.move(prevX, prevY, newX, newY, this.promotedPiece);
+  protected updateBoard(prevX: number, prevY: number, newX: number, newY: number, promotedPiece: FENChar | null): void {
+    this.chessBoard.move(prevX, prevY, newX, newY, promotedPiece);
     this.chessBoardView = this.chessBoard.chessBoardView;
-    this.checkState = this.chessBoard.checkState;
-    this.lastMove = this.chessBoard.lastMove;
+    //this.markLastMoveAndCheckState(this.chessBoard.lastMove, this.chessBoard.checkState);
     this.unmarkingPreviouslySelectedAndSafeSquares();
+    this.chessBoardService.chessBoardState$.next(this.chessBoard.boardAsFEN);
+    this.gameHistoryPointer++;
   }
 
   public promotePiece(piece: FENChar): void{
@@ -127,7 +133,7 @@ export class ChessBoardComponent {
     this.promotedPiece = piece; 
     const {x: newX, y: newY} = this.promotionCoords;
     const {x: prevX, y: prevY} = this.selectedSquare;
-    this.updateBoard(prevX, prevY, newX, newY);
+    this.updateBoard(prevX, prevY, newX, newY, this.promotedPiece);
   }
 
   public closePawnPromotionDialog(): void{
@@ -135,6 +141,16 @@ export class ChessBoardComponent {
 
   }
 
+  /*private markLastMoveAndCheckState(lastMove: LastMove | undefined, checkState: CheckState): void {
+    this.lastMove = lastMove;
+    this.checkState = checkState;
+
+    if (this.lastMove)
+      this.moveSound(this.lastMove.moveType);
+    else
+      this.moveSound(new Set<MoveType>([MoveType.BasicMove]));
+  }*/
+  
   public move(x: number, y: number): void{
     this.selectingPiece(x, y);
     this.placingPiece(x, y);
@@ -144,4 +160,5 @@ export class ChessBoardComponent {
     const isWhitePieceSelected: boolean = piece === piece.toUpperCase();
     return isWhitePieceSelected && this.playerColor === Color.Black || !isWhitePieceSelected && this.playerColor === Color.White;
   }
+
 }

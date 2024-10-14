@@ -81,7 +81,7 @@ export class ChessBoard{
     }
     
     public get gameOverMessage(): string|undefined{
-        return this.gameOverMessage;
+        return this._gameOverMessage;
     }
 
     public get boardAsFEN(): string{

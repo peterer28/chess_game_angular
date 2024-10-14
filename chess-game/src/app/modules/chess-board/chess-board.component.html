@@ -11,6 +11,7 @@
             " (click)="move(x, y)">
             
             <div [ngClass]="{'safe-square': isSquareSafeForSelectedPiece(x,y)}"></div>
+            
             <img *ngIf="piece" [src]="pieceImagePaths[piece]" [alt]="piece" class="piece" 
                 [ngClass]="{rotated: flipMode}">            
         </div>
